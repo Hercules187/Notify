@@ -26,3 +26,6 @@ C:\Users\Steven\OneDrive\Documents\Notify\Notify\obj\Debug\Notify.exe.manifest
 C:\Users\Steven\OneDrive\Documents\Notify\Notify\obj\Debug\Notify.application
 C:\Users\Steven\OneDrive\Documents\Notify\Notify\bin\Debug\Notify.exe.CodeAnalysisLog.xml
 C:\Users\Steven\OneDrive\Documents\Notify\Notify\bin\Debug\Notify.exe.lastcodeanalysissucceeded
+C:\Source\Notify\Notify\bin\Debug\Notify.exe.config
+C:\Source\Notify\Notify\obj\Debug\Notify.exe
+C:\Source\Notify\Notify\obj\Debug\Notify.pdb
