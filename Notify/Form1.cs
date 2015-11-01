@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -16,24 +14,26 @@ namespace Notify
     public partial class Form1 : Form
     {
         Timer timer1 = new Timer();
-                    string refreshdelay;
-                    string currentadapter;
-                    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = CharSet.Auto)]
-                    extern static bool DestroyIcon(IntPtr handle);
+        string refreshdelay;
+        string currentadapter;
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        extern static bool DestroyIcon(IntPtr handle);
 
         public Form1()
         {
 
             InitializeComponent();
-            
+
             refreshdelay = Notify.Properties.Settings.Default.RefreshDelay;
             currentadapter = Notify.Properties.Settings.Default.CurrentAdapter;
             this.textBox1.Text = refreshdelay;
-            this.listBox1.DataSource = GetAdapterName();
-            this.listBox1.SelectedItem = GetAdapterName()[0];
+            IEnumerable<string> adapters = GetAdapters();
+            this.listBox1.DataSource = adapters;
+            this.listBox1.SelectedItem = adapters.First();
 
 
         }
+
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             string actualdata = string.Empty;
@@ -62,14 +62,8 @@ namespace Notify
             //notifyIcon1.ShowBalloonTip(1000);
             this.Activate();
             //this.Show();
-
-
-            
-
-
-
-
         }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (sender == timer1)
@@ -77,6 +71,7 @@ namespace Notify
                 DrawString(GetSpeed(currentadapter));
             }
         }
+
         private void DrawString(string stringy)
         {
 
@@ -101,7 +96,7 @@ namespace Notify
                 }
                 notifyIcon1.Icon = Icon.FromHandle(bm.GetHicon());
                 DestroyIcon(notifyIcon1.Icon.Handle);
-                
+
 
 
             }
@@ -140,6 +135,7 @@ namespace Notify
             this.Show();
             timer1.Stop();
         }
+
         private string GetSpeed(string index)
         {
             ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name,CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface where Name ='" + index + "'");
@@ -148,13 +144,14 @@ namespace Notify
 
             foreach (ManagementObject queryObj in queryCollection)
             {
-                    numval = Convert.ToInt32(queryObj["CurrentBandwidth"]);
-                    numval = numval / 1000 / 1000;              
+                numval = Convert.ToInt32(queryObj["CurrentBandwidth"]);
+                numval = numval / 1000 / 1000;
             }
             return numval.ToString();
 
         }
-        private List<string> GetAdapterName()
+
+        private IEnumerable<string> GetAdapters()
         {
             List<string> Adapters = new List<string>();
             ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name from Win32_PerfFormattedData_Tcpip_NetworkInterface");
@@ -165,7 +162,6 @@ namespace Notify
                 Adapters.Add(queryObj["Name"].ToString());
             }
             return Adapters;
-
         }
 
 
