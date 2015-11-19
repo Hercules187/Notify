@@ -4,46 +4,39 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Management;
 using System.Runtime.InteropServices;
 
 namespace Notify
 {
-
     public partial class Form1 : Form
     {
-        Timer timer1 = new Timer();
-                    string refreshdelay;
-                    string currentadapter;
-                    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = CharSet.Auto)]
-                    extern static bool DestroyIcon(IntPtr handle);
+        private Timer refreshTimer = new Timer();
+        private string refreshdelay;
+        private string currentadapter;
 
         public Form1()
         {
 
             InitializeComponent();
-            
-            refreshdelay = Notify.Properties.Settings.Default.RefreshDelay;
-            currentadapter = Notify.Properties.Settings.Default.CurrentAdapter;
-            this.textBox1.Text = refreshdelay;
-            this.listBox1.DataSource = GetAdapterName();
-            this.listBox1.SelectedItem = GetAdapterName()[0];
 
-
+            refreshdelay = Properties.Settings.Default.RefreshDelay;
+            currentadapter = Properties.Settings.Default.CurrentAdapter;
+            refreshDelayText.Text = refreshdelay;
+            adapterCombo.DataSource = GetAdapters();
+            adapterCombo.SelectedIndex = 0;
         }
+
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             string actualdata = string.Empty;
-            char[] entereddata = textBox1.Text.ToCharArray();
+            char[] entereddata = refreshDelayText.Text.ToCharArray();
             foreach (char aChar in entereddata.AsEnumerable())
             {
                 if (Char.IsDigit(aChar))
                 {
                     actualdata = actualdata + aChar;
-                    // MessageBox.Show(aChar.ToString());
                 }
                 else
                 {
@@ -52,7 +45,7 @@ namespace Notify
                     actualdata.Trim();
                 }
             }
-            textBox1.Text = actualdata;
+            refreshDelayText.Text = actualdata;
             refreshdelay = actualdata;
         }
 
@@ -62,21 +55,16 @@ namespace Notify
             //notifyIcon1.ShowBalloonTip(1000);
             this.Activate();
             //this.Show();
-
-
-            
-
-
-
-
         }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (sender == timer1)
+            if (sender == refreshTimer)
             {
                 DrawString(GetSpeed(currentadapter));
             }
         }
+
         private void DrawString(string stringy)
         {
 
@@ -100,10 +88,7 @@ namespace Notify
                     g.DrawString(stringy, fontForDrawing, Brushes.Black, rect, stringFormat);
                 }
                 notifyIcon1.Icon = Icon.FromHandle(bm.GetHicon());
-                DestroyIcon(notifyIcon1.Icon.Handle);
-                
-
-
+                Win32.DestroyIcon(notifyIcon1.Icon.Handle);
             }
         }
 
@@ -123,7 +108,7 @@ namespace Notify
             // Activate the form. 
             this.Activate();
             this.Show();
-            timer1.Stop();
+            refreshTimer.Stop();
 
         }
 
@@ -138,8 +123,9 @@ namespace Notify
             // Activate the form. 
             this.Activate();
             this.Show();
-            timer1.Stop();
+            refreshTimer.Stop();
         }
+
         private string GetSpeed(string index)
         {
             ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name,CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface where Name ='" + index + "'");
@@ -148,13 +134,14 @@ namespace Notify
 
             foreach (ManagementObject queryObj in queryCollection)
             {
-                    numval = Convert.ToInt32(queryObj["CurrentBandwidth"]);
-                    numval = numval / 1000 / 1000;              
+                numval = Convert.ToInt32(queryObj["CurrentBandwidth"]);
+                numval = numval / 1000 / 1000;
             }
             return numval.ToString();
 
         }
-        private List<string> GetAdapterName()
+
+        private IEnumerable<string> GetAdapters()
         {
             List<string> Adapters = new List<string>();
             ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name from Win32_PerfFormattedData_Tcpip_NetworkInterface");
@@ -165,13 +152,12 @@ namespace Notify
                 Adapters.Add(queryObj["Name"].ToString());
             }
             return Adapters;
-
         }
 
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void adapterCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentadapter = this.listBox1.SelectedItem.ToString();
+            currentadapter = this.adapterCombo.SelectedItem.ToString();
         }
 
         private void Form1_Closing_Event(object sender, FormClosingEventArgs e)
@@ -192,7 +178,7 @@ namespace Notify
 
                 // Activate the form. 
                 this.Activate();
-                timer1.Stop();
+                refreshTimer.Stop();
             }
         }
 
@@ -201,17 +187,17 @@ namespace Notify
 
             this.Hide();
             DrawString(GetSpeed(currentadapter));
-            timer1 = new Timer();
+            refreshTimer = new Timer();
 
             // Setup timer
-            timer1.Interval = (Convert.ToInt16(refreshdelay) * 1000); //1000ms = 1sec
-            timer1.Tick += new EventHandler(timer1_Tick);
-            timer1.Start();
+            refreshTimer.Interval = (Convert.ToInt16(refreshdelay) * 1000); //1000ms = 1sec
+            refreshTimer.Tick += new EventHandler(timer1_Tick);
+            refreshTimer.Start();
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-            timer1.Stop();
+            refreshTimer.Stop();
         }
 
 
