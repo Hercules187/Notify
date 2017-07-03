@@ -130,14 +130,20 @@ namespace Notify
             ManagementObjectSearcher query = new ManagementObjectSearcher("select Name,Speed from Win32_NetworkAdapter where Name ='" + index + "'");
             int numval = 0;
             ManagementObjectCollection queryCollection = query.Get();
-
-            foreach (ManagementObject queryObj in queryCollection)
+            try
             {
-                numval = Convert.ToInt32(queryObj["Speed"]);
-                numval = numval / 1000 / 1000;
+                foreach (ManagementObject queryObj in queryCollection)
+                {
+                    numval = Convert.ToInt32(queryObj["Speed"]);
+                    numval = numval / 1000 / 1000;
+                }
+                return numval.ToString();
             }
-            return numval.ToString();
-
+            
+            catch
+            {
+                return "0";
+            }
         }
 
         private IEnumerable<string> GetAdapters()
@@ -168,17 +174,21 @@ namespace Notify
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
         {
-            {
-                // Show the form when the user double clicks on the notify icon. 
+            
+                if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                {
+                    // Show the form when the user double clicks on the notify icon. 
 
-                // Set the WindowState to normal if the form is minimized. 
-                if (this.WindowState == FormWindowState.Minimized)
-                    this.WindowState = FormWindowState.Normal;
+                    // Set the WindowState to normal if the form is minimized. 
+                    if (this.WindowState == FormWindowState.Minimized)
+                        this.WindowState = FormWindowState.Normal;
 
-                // Activate the form. 
-                this.Activate();
-                refreshTimer.Stop();
-            }
+                    // Activate the form. 
+                    this.Activate();
+                    this.Show();
+                    refreshTimer.Stop();
+                }
+          
         }
 
         private void button1_Click(object sender, EventArgs e)
