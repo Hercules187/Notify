@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Management;
-using System.Runtime.InteropServices;
 
 namespace Notify
 {
@@ -128,13 +127,13 @@ namespace Notify
 
         private string GetSpeed(string index)
         {
-            ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name,CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface where Name ='" + index + "'");
+            ManagementObjectSearcher query = new ManagementObjectSearcher("select Name,Speed from Win32_NetworkAdapter where Name ='" + index + "'");
             int numval = 0;
             ManagementObjectCollection queryCollection = query.Get();
 
             foreach (ManagementObject queryObj in queryCollection)
             {
-                numval = Convert.ToInt32(queryObj["CurrentBandwidth"]);
+                numval = Convert.ToInt32(queryObj["Speed"]);
                 numval = numval / 1000 / 1000;
             }
             return numval.ToString();
@@ -144,7 +143,7 @@ namespace Notify
         private IEnumerable<string> GetAdapters()
         {
             List<string> Adapters = new List<string>();
-            ManagementObjectSearcher query = new ManagementObjectSearcher("Select Name from Win32_PerfFormattedData_Tcpip_NetworkInterface");
+            ManagementObjectSearcher query = new ManagementObjectSearcher("select Name from Win32_NetworkAdapter");
 
             ManagementObjectCollection queryCollection = query.Get();
             foreach (ManagementObject queryObj in queryCollection)
@@ -199,8 +198,6 @@ namespace Notify
         {
             refreshTimer.Stop();
         }
-
-
     }
 }
 
