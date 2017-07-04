@@ -59,7 +59,7 @@ namespace Notify
             if (sender == refreshTimer)
             {
                 string tempSpeed = GetSpeed(currentadapter);
-                DrawString(tempSpeed);
+                DrawString(tempSpeed.Split('.')[0]);
                 this.notifyIcon1.Text = string.Format("Current Network Speed is: {0}Mbps", tempSpeed);
             }
         }
@@ -115,16 +115,18 @@ namespace Notify
         private string GetSpeed(string index)
         {
             ManagementObjectSearcher query = new ManagementObjectSearcher("select Name,Speed from Win32_NetworkAdapter where Name ='" + index + "'");
-            int numval = 0;
+            decimal numval = 0;
             ManagementObjectCollection queryCollection = query.Get();
             try
             {
                 foreach (ManagementObject queryObj in queryCollection)
                 {
-                    numval = Convert.ToInt32(queryObj["Speed"]);
+                    numval = Convert.ToDecimal(queryObj["Speed"]);
                     numval = numval / 1000 / 1000;
+
                 }
                 return numval.ToString();
+
             }
             
             catch
@@ -182,7 +184,7 @@ namespace Notify
         {
 
             this.Hide();
-            DrawString(GetSpeed(currentadapter));
+            DrawString(GetSpeed(currentadapter).Split('.')[0]);
             refreshTimer = new Timer();
 
             // Setup timer
