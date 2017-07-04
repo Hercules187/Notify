@@ -50,17 +50,17 @@ namespace Notify
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // When the program begins, show the balloon on the icon for one second.
-            //notifyIcon1.ShowBalloonTip(1000);
             this.Activate();
-            //this.Show();
         }
+
 
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (sender == refreshTimer)
             {
-                DrawString(GetSpeed(currentadapter));
+                string tempSpeed = GetSpeed(currentadapter);
+                DrawString(tempSpeed);
+                this.notifyIcon1.Text = string.Format("Current Network Speed is: {0}Mbps", tempSpeed);
             }
         }
 
@@ -111,19 +111,6 @@ namespace Notify
 
         }
 
-        private void notifyIcon1_MouseDoubleClick_1(object sender, MouseEventArgs e)
-        {
-            // Show the form when the user double clicks on the notify icon. 
-
-            // Set the WindowState to normal if the form is minimized. 
-            if (this.WindowState == FormWindowState.Minimized)
-                this.WindowState = FormWindowState.Normal;
-
-            // Activate the form. 
-            this.Activate();
-            this.Show();
-            refreshTimer.Stop();
-        }
 
         private string GetSpeed(string index)
         {
