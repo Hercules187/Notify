@@ -46,7 +46,7 @@
             this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.NotifyIcon1_MouseClick);
-             // 
+            // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -95,6 +95,7 @@
             this.refreshDelayText.Name = "refreshDelayText";
             this.refreshDelayText.Size = new System.Drawing.Size(218, 26);
             this.refreshDelayText.TabIndex = 5;
+            this.refreshDelayText.MaxLength = 5;
             this.refreshDelayText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
@@ -116,6 +117,7 @@
             this.adapterCombo.Size = new System.Drawing.Size(270, 28);
             this.adapterCombo.TabIndex = 7;
             this.adapterCombo.SelectionChangeCommitted += new System.EventHandler(this.adapterCombo_SelectedIndexChanged);
+            this.adapterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             // 
             // Form1
             // 

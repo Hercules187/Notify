@@ -39,7 +39,7 @@ namespace Notify
                 }
                 else
                 {
-                    MessageBox.Show(aChar + " is not numeric");
+                    MessageBox.Show(string.Format("The entered character {0} is not numeric, try again!",aChar));
                     actualdata.Replace(aChar, ' ');
                     actualdata.Trim();
                 }
@@ -156,9 +156,11 @@ namespace Notify
 
         private void Form1_Closing_Event(object sender, FormClosingEventArgs e)
         {
+
             Notify.Properties.Settings.Default.RefreshDelay = refreshdelay;
             Notify.Properties.Settings.Default.CurrentAdapter = currentadapter;
             Notify.Properties.Settings.Default.Save();
+
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -182,15 +184,24 @@ namespace Notify
 
         private void button1_Click(object sender, EventArgs e)
         {
+            int testInt = Convert.ToInt32(refreshdelay);
+            if (!(testInt > 0) || !(testInt < 32767))
+            {
+                MessageBox.Show("Value must be between 1 and 32767");
+                refreshdelay = "1";
+                refreshDelayText.Text = refreshdelay;
+            }
+            else
+            {
+                this.Hide();
+                DrawString(GetSpeed(currentadapter).Split('.')[0]);
+                refreshTimer = new Timer();
 
-            this.Hide();
-            DrawString(GetSpeed(currentadapter).Split('.')[0]);
-            refreshTimer = new Timer();
-
-            // Setup timer
-            refreshTimer.Interval = (Convert.ToInt16(refreshdelay) * 1000); //1000ms = 1sec
-            refreshTimer.Tick += new EventHandler(timer1_Tick);
-            refreshTimer.Start();
+                // Setup timer
+                refreshTimer.Interval = (Convert.ToInt16(refreshdelay) * 1000); //1000ms = 1sec
+                refreshTimer.Tick += new EventHandler(timer1_Tick);
+                refreshTimer.Start();
+            }
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
