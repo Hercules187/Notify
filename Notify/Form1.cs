@@ -39,7 +39,7 @@ namespace Notify
                 }
                 else
                 {
-                    MessageBox.Show(string.Format("The entered character {0} is not numeric, try again!",aChar));
+                    MessageBox.Show(string.Format("The entered character {0} is not numeric, try again!",aChar),"Refresh Delay");
                     actualdata.Replace(aChar, ' ');
                     actualdata.Trim();
                 }
@@ -187,7 +187,7 @@ namespace Notify
             int testInt = Convert.ToInt32(refreshdelay);
             if (!(testInt > 0) || !(testInt < 32767))
             {
-                MessageBox.Show("Value must be between 1 and 32767");
+                MessageBox.Show("Value must be between 1 and 32767","Refresh Delay");
                 refreshdelay = "1";
                 refreshDelayText.Text = refreshdelay;
             }
