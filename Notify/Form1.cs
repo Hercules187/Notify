@@ -59,14 +59,13 @@ namespace Notify
             if (sender == refreshTimer)
             {
                 string tempSpeed = GetSpeed(currentadapter);
-                DrawString(tempSpeed.Split('.')[0]);
-                this.notifyIcon1.Text = string.Format("Current Network Speed is: {0}Mbps", tempSpeed);
+                DrawString(tempSpeed);
             }
         }
 
-        private void DrawString(string stringy)
+        private void DrawString(string stringylong)
         {
-
+            string stringy = stringylong.Split('.')[0];
             Bitmap bm = new Bitmap(32, 32);
             using (Font font = new Font("Helvetica", 8, GraphicsUnit.Point))
             using (Graphics g = Graphics.FromImage(bm))
@@ -87,6 +86,7 @@ namespace Notify
                     g.DrawString(stringy, fontForDrawing, Brushes.Black, rect, stringFormat);
                 }
                 notifyIcon1.Icon = Icon.FromHandle(bm.GetHicon());
+                this.notifyIcon1.Text = string.Format("Current Network Speed is {0}Mbps", stringylong);
                 Win32.DestroyIcon(notifyIcon1.Icon.Handle);
             }
         }
