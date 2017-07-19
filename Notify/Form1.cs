@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Management;
+using System.Reflection;
 
 namespace Notify
 {
@@ -14,6 +15,8 @@ namespace Notify
         private Timer refreshTimer = new Timer();
         private string refreshdelay;
         private string currentadapter;
+        private string colour;
+        public Dictionary<string, string> values = new Dictionary<string, string>();
 
         public Form1()
         {
@@ -22,9 +25,12 @@ namespace Notify
 
             refreshdelay = Properties.Settings.Default.RefreshDelay;
             currentadapter = Properties.Settings.Default.CurrentAdapter;
+            colour = Properties.Settings.Default.Colour;
             refreshDelayText.Text = refreshdelay;
             adapterCombo.DataSource = GetAdapters();
-            adapterCombo.SelectedIndex = 0;
+            adapterCombo.SelectedItem = currentadapter;
+            colourComboBox.DataSource = GetColours();
+            colourComboBox.SelectedItem = colour;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -46,6 +52,7 @@ namespace Notify
             }
             refreshDelayText.Text = actualdata;
             refreshdelay = actualdata;
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -59,14 +66,16 @@ namespace Notify
             if (sender == refreshTimer)
             {
                 string tempSpeed = GetSpeed(currentadapter);
-                DrawString(tempSpeed);
+                DrawString(tempSpeed,colour);
             }
         }
 
-        private void DrawString(string stringylong)
+        private void DrawString(string stringylong, string brushColour)
         {
             string stringy = stringylong.Split('.')[0];
             Bitmap bm = new Bitmap(32, 32);
+            var brushColor = Color.FromName(brushColour);
+            var brush = new SolidBrush(brushColor);
             using (Font font = new Font("Helvetica", 8, GraphicsUnit.Point))
             using (Graphics g = Graphics.FromImage(bm))
             {
@@ -81,9 +90,11 @@ namespace Notify
                 SizeF s = g.MeasureString(stringy, font);
                 // calculate how to scale the font to make the text fit
                 float fontScale = Math.Max(s.Width / rect.Width, s.Height / rect.Height);
+
                 using (Font fontForDrawing = new Font(font.FontFamily, font.SizeInPoints / fontScale, GraphicsUnit.Point))
                 {
-                    g.DrawString(stringy, fontForDrawing, Brushes.Black, rect, stringFormat);
+                    
+                    g.DrawString(stringy, fontForDrawing, brush, rect, stringFormat);
                 }
                 notifyIcon1.Icon = Icon.FromHandle(bm.GetHicon());
                 this.notifyIcon1.Text = string.Format("Current Network Speed is {0}Mbps", stringylong);
@@ -148,17 +159,43 @@ namespace Notify
             return Adapters;
         }
 
+        private IEnumerable<string> GetColours()
+        {
 
-        private void adapterCombo_SelectedIndexChanged(object sender, EventArgs e)
+            Type colorType = typeof(System.Drawing.Color);
+            List<string> colorNames = new List<string>();
+
+            PropertyInfo[] propInfoList = colorType.GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+
+            foreach(PropertyInfo propinf in propInfoList)
+            {
+                colorNames.Add(propinf.Name.ToString());
+            }
+            colorNames.Remove("Transparent");
+
+            return colorNames;
+
+        }
+
+
+
+        private void adapterCombo_SelectionChangeCommitted(object sender, EventArgs e)
         {
             currentadapter = this.adapterCombo.SelectedItem.ToString();
         }
+
+        private void colourComboBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            colour = this.colourComboBox.SelectedItem.ToString();
+        }
+
 
         private void Form1_Closing_Event(object sender, FormClosingEventArgs e)
         {
 
             Notify.Properties.Settings.Default.RefreshDelay = refreshdelay;
             Notify.Properties.Settings.Default.CurrentAdapter = currentadapter;
+            Notify.Properties.Settings.Default.Colour = colour;
             Notify.Properties.Settings.Default.Save();
 
         }
@@ -194,7 +231,7 @@ namespace Notify
             else
             {
                 this.Hide();
-                DrawString(GetSpeed(currentadapter).Split('.')[0]);
+                DrawString(GetSpeed(currentadapter).Split('.')[0],colour);
                 refreshTimer = new Timer();
 
                 // Setup timer
@@ -208,6 +245,8 @@ namespace Notify
         {
             refreshTimer.Stop();
         }
+
+
     }
 }
 

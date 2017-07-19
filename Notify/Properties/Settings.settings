@@ -6,10 +6,13 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="RefreshDelay" Type="System.String" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="CurrentAdapter" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Colour" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Black</Value>
     </Setting>
   </Settings>
 </SettingsFile>

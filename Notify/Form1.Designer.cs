@@ -1,4 +1,6 @@
-﻿namespace Notify
+﻿using System.Collections.Generic;
+
+namespace Notify
 {
     partial class Form1
     {
@@ -38,6 +40,8 @@
             this.refreshDelayText = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.adapterCombo = new System.Windows.Forms.ComboBox();
+            this.colourComboBox = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -91,16 +95,16 @@
             // 
             // refreshDelayText
             // 
-            this.refreshDelayText.Location = new System.Drawing.Point(204, 58);
-            this.refreshDelayText.Name = "refreshDelayText";
-            this.refreshDelayText.Size = new System.Drawing.Size(218, 26);
-            this.refreshDelayText.TabIndex = 5;
+            this.refreshDelayText.Location = new System.Drawing.Point(298, 58);
             this.refreshDelayText.MaxLength = 5;
+            this.refreshDelayText.Name = "refreshDelayText";
+            this.refreshDelayText.Size = new System.Drawing.Size(124, 26);
+            this.refreshDelayText.TabIndex = 5;
             this.refreshDelayText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(340, 95);
+            this.button1.Location = new System.Drawing.Point(185, 132);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(84, 31);
             this.button1.TabIndex = 6;
@@ -110,21 +114,43 @@
             // 
             // adapterCombo
             // 
+            this.adapterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.adapterCombo.FormattingEnabled = true;
             this.adapterCombo.Location = new System.Drawing.Point(153, 18);
             this.adapterCombo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.adapterCombo.Name = "adapterCombo";
             this.adapterCombo.Size = new System.Drawing.Size(270, 28);
             this.adapterCombo.TabIndex = 7;
-            this.adapterCombo.SelectionChangeCommitted += new System.EventHandler(this.adapterCombo_SelectedIndexChanged);
-            this.adapterCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.adapterCombo.SelectionChangeCommitted += new System.EventHandler(this.adapterCombo_SelectionChangeCommitted);
+            // 
+            // colourComboBox
+            // 
+            this.colourComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.colourComboBox.FormattingEnabled = true;
+            this.colourComboBox.Location = new System.Drawing.Point(298, 92);
+            this.colourComboBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.colourComboBox.Name = "colourComboBox";
+            this.colourComboBox.Size = new System.Drawing.Size(125, 28);
+            this.colourComboBox.TabIndex = 8;
+            this.colourComboBox.SelectionChangeCommitted += new System.EventHandler(this.colourComboBox_SelectionChangeCommitted);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(14, 100);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(55, 20);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "Colour";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(498, 194);
+            this.ClientSize = new System.Drawing.Size(463, 246);
             this.ControlBox = false;
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.colourComboBox);
             this.Controls.Add(this.adapterCombo);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.refreshDelayText);
@@ -134,6 +160,7 @@
             this.Name = "Form1";
             this.Text = "Bandwidth Bandit";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing_Event);
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -151,6 +178,8 @@
         private System.Windows.Forms.TextBox refreshDelayText;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ComboBox adapterCombo;
+        private System.Windows.Forms.ComboBox colourComboBox;
+        private System.Windows.Forms.Label label3;
     }
 }
 
