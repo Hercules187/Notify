@@ -132,8 +132,9 @@ namespace Notify
             {
                 foreach (ManagementObject queryObj in queryCollection)
                 {
+                    //Get raw value and convert to friendly Megabits
                     numval = Convert.ToDecimal(queryObj["Speed"]);
-                    numval = numval / 1000 / 1000;
+                    numval = numval / 1000000;
 
                 }
                 return numval.ToString();
@@ -164,13 +165,14 @@ namespace Notify
 
             Type colorType = typeof(System.Drawing.Color);
             List<string> colorNames = new List<string>();
-
+            //Enumerates properties using reflection.
             PropertyInfo[] propInfoList = colorType.GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
 
             foreach(PropertyInfo propinf in propInfoList)
             {
                 colorNames.Add(propinf.Name.ToString());
             }
+            //remove transparency as it doesnt work
             colorNames.Remove("Transparent");
 
             return colorNames;
