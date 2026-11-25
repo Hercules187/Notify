@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX manifest template for Notify. build-msix.ps1 fills in the {{...}} values.
+  For the Microsoft Store, IdentityName / Publisher / PublisherDisplayName must match
+  Partner Center > your app > Product identity (set them as GitHub repository variables).
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop rescap">
+
+  <Identity
+    Name="{{IdentityName}}"
+    Publisher="{{Publisher}}"
+    Version="{{Version}}"
+    ProcessorArchitecture="{{Arch}}" />
+
+  <Properties>
+    <DisplayName>Notify - Wi-Fi Speed</DisplayName>
+    <PublisherDisplayName>{{PublisherDisplayName}}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Shows your Wi-Fi link speed in the system tray.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-GB" />
+  </Resources>
+
+  <Applications>
+    <Application Id="Notify" Executable="Notify.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Notify"
+        Description="Your Wi-Fi link speed, live in the system tray."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- "Start with Windows" for the packaged app (Settings > Apps > Startup). Off until the user turns it on. -->
+        <desktop:Extension Category="windows.startupTask" Executable="Notify.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="NotifyStartup" Enabled="false" DisplayName="Notify" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <!-- Lets Windows show a normal per-app location prompt, needed for the Wi-Fi network name and signal. -->
+    <DeviceCapability Name="location" />
+  </Capabilities>
+</Package>

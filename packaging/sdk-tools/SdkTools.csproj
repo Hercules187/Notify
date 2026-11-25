@@ -1,0 +1,15 @@
+<!--
+  Not a real project: restoring it downloads Microsoft's Windows SDK BuildTools NuGet package,
+  which contains makeappx.exe. build-msix.ps1 uses that, so no Windows SDK install is needed
+  (locally or on the GitHub runner).
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" GeneratePathProperty="true" />
+  </ItemGroup>
+</Project>

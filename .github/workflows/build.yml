@@ -1,0 +1,97 @@
+# Builds Notify on every push and pull request.
+# Pushing a tag like v2.0.1 also publishes a GitHub release with the download zips,
+# and produces the MSIX bundle for the Microsoft Store as a workflow artifact.
+#
+# For a Store-ready MSIX, set these repository variables (Settings > Secrets and variables >
+# Actions > Variables) to the values from Partner Center > your app > Product identity:
+#   STORE_IDENTITY_NAME, STORE_PUBLISHER, STORE_PUBLISHER_DISPLAY_NAME
+name: Build
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Work out the version
+        id: ver
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $v = $env:GITHUB_REF_NAME.TrimStart('v')
+          } else {
+            # Untagged builds: version from the project file
+            $v = ([xml](Get-Content Notify/Notify.csproj)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Tag/version must look like 2.0.1, got '$v'" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "msix=$v.0" >> $env:GITHUB_OUTPUT
+          Write-Host "Version $v (MSIX $v.0)"
+
+      - name: Build
+        run: dotnet build Notify.sln -c Release -warnaserror
+
+      - name: Download zips
+        shell: pwsh
+        run: ./packaging/build-zips.ps1 -Version ${{ steps.ver.outputs.version }}
+
+      - name: MSIX bundle (for the Microsoft Store)
+        shell: pwsh
+        env:
+          IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME || 'Notify.Dev' }}
+          PUBLISHER: ${{ vars.STORE_PUBLISHER || 'CN=NotifyDev' }}
+          PUBLISHER_DISPLAY_NAME: ${{ vars.STORE_PUBLISHER_DISPLAY_NAME || 'Steven Connelly' }}
+        run: >
+          ./packaging/build-msix.ps1 -Version ${{ steps.ver.outputs.msix }}
+          -IdentityName $env:IDENTITY_NAME -Publisher $env:PUBLISHER -PublisherDisplayName $env:PUBLISHER_DISPLAY_NAME
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notify-zips-${{ steps.ver.outputs.version }}
+          path: publish/release/*
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notify-msix-${{ steps.ver.outputs.msix }}
+          path: publish/msix/*.msixbundle
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: notify-zips-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create or update the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -la dist
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "Notify ${TAG#v}" --generate-notes
+          fi

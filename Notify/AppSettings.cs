@@ -47,22 +47,67 @@ public sealed class AppSettings
     }
 
     // ---- Start with Windows (per-user Run key, no admin rights needed) ----
+    // Packaged (MSIX / Store) builds can't use the Run key: Windows virtualises their registry writes.
+    // They use the StartupTask declared in Package.appxmanifest instead (Settings > Apps > Startup).
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string RunValue = "Notify";
+    private const string StartupTaskId = "NotifyStartup";
 
     public static bool StartsWithWindows
     {
         get
         {
+            if (Packaging.IsPackaged)
+                return RunOffUiThread(async () =>
+                {
+                    var task = await Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId);
+                    return task.State is Windows.ApplicationModel.StartupTaskState.Enabled
+                        or Windows.ApplicationModel.StartupTaskState.EnabledByPolicy;
+                });
             using var key = Registry.CurrentUser.OpenSubKey(RunKey);
             return key?.GetValue(RunValue) is string path &&
                    string.Equals(path.Trim('"'), Environment.ProcessPath, StringComparison.OrdinalIgnoreCase);
         }
         set
         {
+            if (Packaging.IsPackaged)
+            {
+                RunOffUiThread(async () =>
+                {
+                    var task = await Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId);
+                    if (value) await task.RequestEnableAsync(); // no effect if the user disabled it in Settings > Apps > Startup
+                    else task.Disable();
+                    return true;
+                });
+                return;
+            }
             using var key = Registry.CurrentUser.CreateSubKey(RunKey);
             if (value && Environment.ProcessPath is { } exe) key.SetValue(RunValue, $"\"{exe}\"");
             else key.DeleteValue(RunValue, throwOnMissingValue: false);
         }
+    }
+
+    // WinRT async calls are awaited on the thread pool so the UI thread never blocks on itself.
+    private static T RunOffUiThread<T>(Func<Task<T>> work) => Task.Run(work).GetAwaiter().GetResult();
+}
+
+/// <summary>Whether Notify is running from an MSIX package (Store install) or as a plain exe.</summary>
+internal static class Packaging
+{
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref int length, System.Text.StringBuilder? name);
+
+    private const int AppModelErrorNoPackage = 15700;
+
+    public static readonly bool IsPackaged = Detect();
+
+    private static bool Detect()
+    {
+        try
+        {
+            int length = 0;
+            return GetCurrentPackageFullName(ref length, null) != AppModelErrorNoPackage;
+        }
+        catch (EntryPointNotFoundException) { return false; } // Windows 7
     }
 }
